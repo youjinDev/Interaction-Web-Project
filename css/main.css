@@ -25,15 +25,27 @@ a {
 
 /* Navigation */
 
+.nav-container {
+  position: relative;
+}
+
 .global-nav {
   height: 44px;
   padding: 0 1rem;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 .local-nav {
   padding: 0 1rem;
   height: 52px;
   border-bottom: 1px solid #ddd;
+  position: absolute;
+  width: 100%;
+  top: 45px;
+  left: 0;
 }
 
 .global-nav-links,
@@ -65,8 +77,40 @@ a {
 
 /* Scroll section */
 
+.sticky-elem {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+#show-scene-0 #scroll-section-0 .sticky-elem,
+#show-scene-1 #scroll-section-1 .sticky-elem,
+#show-scene-2 #scroll-section-2 .sticky-elem,
+#show-scene-3 #scroll-section-3 .sticky-elem {
+  display: block;
+}
+
+#scroll-section-0 {
+  border: 3px red solid;
+}
+
+#scroll-section-1 {
+  background-color: aliceblue;
+}
+
+#scroll-section-2 {
+  background-color: beige;
+}
+
+#scroll-section-3 {
+  background-color: bisque;
+}
+
 .scroll-section {
   padding-top: 50vh;
+  border: 3px red solid;
 }
 
 #scroll-section-0 h1 {
@@ -75,10 +119,8 @@ a {
 }
 
 .main-message {
-  display: flex;
   height: 4em;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   font-size: 2.5rem;
 }
 
@@ -94,7 +136,6 @@ a {
 
 #scroll-section-2 .main-message {
   font-size: 3.5rem;
-  display: block;
 }
 
 .description {
