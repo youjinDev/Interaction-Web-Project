@@ -25,10 +25,6 @@ a {
 
 /* Navigation */
 
-.nav-container {
-  position: relative;
-}
-
 .global-nav {
   height: 44px;
   padding: 0 1rem;
@@ -80,7 +76,6 @@ a {
 .sticky-elem {
   display: none;
   position: fixed;
-  top: 0;
   left: 0;
   width: 100%;
   height: fit-content;
@@ -124,6 +119,7 @@ a {
   text-align: center;
   font-size: 2.5rem;
   opacity: 0;
+  top: 40vh;
 }
 
 .main-message p {
