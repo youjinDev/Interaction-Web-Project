@@ -78,7 +78,6 @@ a {
   position: fixed;
   left: 0;
   width: 100%;
-  height: fit-content;
 }
 
 #show-scene-0 #scroll-section-0 .sticky-elem,
@@ -86,22 +85,6 @@ a {
 #show-scene-2 #scroll-section-2 .sticky-elem,
 #show-scene-3 #scroll-section-3 .sticky-elem {
   display: block;
-}
-
-#scroll-section-0 {
-  border: 3px red solid;
-}
-
-#scroll-section-1 {
-  background-color: aliceblue;
-}
-
-#scroll-section-2 {
-  background-color: beige;
-}
-
-#scroll-section-3 {
-  background-color: bisque;
 }
 
 .scroll-section {
@@ -151,15 +134,26 @@ a {
   color: black;
 }
 
-.desc-message {
+.sticky-elem.desc-message {
   font-weight: bold;
   width: 50%;
+  opacity: 0;
 }
 
 .pin {
   width: 1px;
   height: 100px;
   background-color: rgb(29, 29, 31);
+}
+
+#scroll-section-2 .b {
+  top: 10%;
+  left: 40%;
+}
+
+#scroll-section-2 .c {
+  top: 15%;
+  left: 45%;
 }
 
 #scroll-section-3 .mid-message {
@@ -208,10 +202,17 @@ a {
   #scroll-section-2 .main-message {
     font-size: 6vw;
   }
+  #scroll-section-2 .b {
+    top: 20%;
+    left: 53%;
+  }
+  #scroll-section-2 .c {
+    left: 55%;
+  }
   .main-message small {
     font-size: 1.5vw;
   }
-  .desc-message {
+  .sticky-elem.desc-message {
     width: 20%;
   }
   #scroll-section-3 .mid-message {
