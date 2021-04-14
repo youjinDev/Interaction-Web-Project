@@ -22,8 +22,9 @@
                 values: {
                     messageA_opacity_in: [0, 1, {start : 0.1, end : 0.2}],
                     messageA_opacity_out: [1, 0, {start : 0.25, end : 0.3}],
-                    messageB_opacity_in: [0, 1, {start : 0.3, end : 0.4}],
-                    messageB_opacity_out: [1, 0, {start : 0.5, end : 0.6}],
+                    messageA_translateY_in: [20, 0, { start: 0.1, end: 0.2 }],
+                    messageA_translateY_out: [0, -20, { start: 0.25, end: 0.3 }]
+                
                 }
             },
             {   // 1
@@ -34,9 +35,7 @@
                     container: document.querySelector('#scroll-section-1')
                 },
                 values: {
-
                 }
-
             },
             {   // 2
                 type: 'sticky',
@@ -69,7 +68,8 @@
 
     
         
-        
+        const scrollHeight = sceneInfo[currentScene].scrollHeight;
+
         // 새로고침해도 sticky-elem들이 남아있게 하기 위해
         // 초기화 할 때 실행되는 함수
         function setLayout() {
@@ -127,24 +127,31 @@
             }
             return prevScrollHeight;
         }
+        
 
         // 한 section 내부에서의 재생될 애니메이션에 관한 함수
         function playAnimation() {
             const objs = sceneInfo[currentScene].objs;
             const values = sceneInfo[currentScene].values;
             const currentYOffset = yOffset - prevScrollHeight; // 여기가 음수 되는 원인
+            const scrollRatio = currentYOffset / scrollHeight; // current Scene에서 얼만큼 스크롤 했는지 비율
 
             switch (currentScene) {
                 case 0:
                     let messageA_opacity_in = calcValues(values.messageA_opacity_in, currentYOffset);
                     let messageA_opacity_out = calcValues(values.messageA_opacity_out, currentYOffset);
+                    let messageA_translateY_in = calcValues(values.messageA_translateY_in, currentYOffset);
+                    let messageA_translateY_out = calcValues(values.messageA_translateY_out, currentYOffset);
 
-                    if(currentYOffset < scrollHeight * 0.225) {
+                    if(scrollRatio <= 0.22) {
+                        // in
                         objs.messageA.style.opacity = messageA_opacity_in;
-                    } else if (currentYOffset > scrollHeight * 0.225) {
+                        objs.messageA.style.transform = `translateY(${messageA_translateY_in}%)`;
+                    } else {
+                        // out
                         objs.messageA.style.opacity = messageA_opacity_out;
+                        objs.messageA.style.transform = `translateY(${messageA_translateY_out}%)`;
                     }
-                    console.log(objs.messageA.style.opacity);
                     break;
                 case 1:
 
@@ -156,11 +163,10 @@
             }
         }
         
-        const scrollHeight = sceneInfo[currentScene].scrollHeight;
+        
         // 범위 계산 함수
         function calcValues(values, currentYOffset) {
             let rv;
-            // 0~1의 값
             const scrollRatio = currentYOffset / sceneInfo[currentScene].scrollHeight;
             
             if (values.length === 3) {
@@ -168,9 +174,8 @@
                 const partScrollStart = values[2].start * scrollHeight; // px값
                 const partScrollEnd = values[2].end * scrollHeight;
                 const partScrollHeight = partScrollEnd - partScrollStart;
-
-                if (currentYOffset >= partScrollStart && currentYOffset < partScrollEnd) {
-                    rv = (currentYOffset - partScrollStart) / partScrollHeight; // 비율값
+                if (currentYOffset >= partScrollStart && currentYOffset <= partScrollEnd) {
+                    rv = (currentYOffset - partScrollStart) / partScrollHeight * (values[1] - values[0]) + values[0];
                 } else if (currentYOffset < partScrollStart) {
                     rv = values[0];
                 } else if (currentYOffset > partScrollEnd) {
@@ -179,7 +184,6 @@
             } else {
                 rv = (scrollRatio * (values[1] - values[0])) + values[0];
             }
-            // console.log(currentScene, currentYOffset, sceneInfo[currentScene].scrollHeight);
             return rv;
         }
     }
