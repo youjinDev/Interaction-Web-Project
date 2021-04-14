@@ -83,6 +83,7 @@ a {
   top: 0;
   left: 0;
   width: 100%;
+  height: fit-content;
 }
 
 #show-scene-0 #scroll-section-0 .sticky-elem,
@@ -122,6 +123,7 @@ a {
   height: 4em;
   text-align: center;
   font-size: 2.5rem;
+  opacity: 0;
 }
 
 .main-message p {
