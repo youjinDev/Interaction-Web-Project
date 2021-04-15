@@ -87,6 +87,17 @@ a {
   display: block;
 }
 
+.sticky-elem-canvas {
+  top: 0;
+  height: 100%;
+  z-index: -1;
+}
+
+.sticky-elem-canvas canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
 .scroll-section {
   padding-top: 50vh;
   border: 3px red solid;
