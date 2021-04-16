@@ -1,8 +1,8 @@
 'use strict';
 (
     () => {
-        let yOffset = 0; // window.scrollY
-        let prevScrollHeight = 0; // 현재 보고있는 섹션 이전 섹션들의 scroll height 총합
+        let yOffset = 0; // window.pageYOffset
+        let prevScrollHeight = 0; // 현재 보고있는 섹션 이전 섹션들의 scrollHeight 총합
         let currentSection = 0; // 현재 활성화된 section number
         let isEnterNewSection = false; // 새로운 섹션에 진입한 순간 true
         
@@ -18,14 +18,17 @@
                     messageB: document.querySelector('#scroll-section-0 .main-message.b'),
                     messageC: document.querySelector('#scroll-section-0 .main-message.c'),
                     messageD: document.querySelector('#scroll-section-0 .main-message.d'),
-                    canvas: document.querySelector('#video-canvas-0'),
-                    context: document.querySelector('#video-canvas-0').getContext('2d'),
+                    canvas: document.querySelector('#video-canvas'),
+                    canvasDiv: document.querySelector('.sticky-elem-canvas'),
+                    context: document.querySelector('#video-canvas').getContext('2d'),
                     videoImages: []
                 },
                 values: {
                     videoImageCount: 300,
                     imageSequence: [0, 299],
-                    // [첫범위, 끝범위, {첫좌표범위, 끝좌표범위}]
+                    // [첫범위, 끝범위, {첫좌표ratio, 끝좌표ratio}]
+                    canvas_opacity_in: [0, 1, {start: 0.1, end : 0.2}],
+                    canvas_opacity_out: [1, 0, {start: 0.85, end : 0.95}],
                     messageA_opacity_in: [0, 1, { start: 0.1, end: 0.2 }],
                     messageB_opacity_in: [0, 1, { start: 0.3, end: 0.4 }],
                     messageC_opacity_in: [0, 1, { start: 0.5, end: 0.6 }],
@@ -50,35 +53,12 @@
                 objs: {
                     container: document.querySelector('#scroll-section-1'),
                     content: document.querySelector('#scroll-section-1 .description')
+                },
+                values: {
                 }
             },
             // {   // 2
-            //     type: 'sticky',
-            //     heightNum: 5,
-            //     scrollHeight: 0,                
-            //     objs: {
-            //         container: document.querySelector('#scroll-section-2'),
-            //         messageA: document.querySelector('#scroll-section-2 .a'),
-            //         messageB: document.querySelector('#scroll-section-2 .b'),
-            //         messageC: document.querySelector('#scroll-section-2 .c'),
-            //         pinB: document.querySelector('#scroll-section-2 .b .pin'),
-            //         pinC: document.querySelector('#scroll-section-2 .c .pin')
-            //     },
-            //     values: {
-            //         messageA_translateY_in: [20, 0, { start: 0.15, end: 0.2 }],
-            //         messageB_translateY_in: [30, 0, { start: 0.6, end: 0.65 }],
-            //         messageC_translateY_in: [30, 0, { start: 0.87, end: 0.92 }],
-            //         messageA_opacity_in: [0, 1, { start: 0.25, end: 0.3 }],
-            //         messageB_opacity_in: [0, 1, { start: 0.6, end: 0.65 }],
-            //         messageC_opacity_in: [0, 1, { start: 0.87, end: 0.92 }],
-            //         messageA_translateY_out: [0, -20, { start: 0.4, end: 0.45 }],
-            //         messageB_translateY_out: [0, -20, { start: 0.68, end: 0.73 }],
-            //         messageC_translateY_out: [0, -20, { start: 0.95, end: 1 }],
-            //         messageA_opacity_out: [1, 0, { start: 0.4, end: 0.45 }],
-            //         messageB_opacity_out: [1, 0, { start: 0.68, end: 0.73 }],
-            //         messageC_opacity_out: [1, 0, { start: 0.95, end: 1 }],
-            //         pinB_scaleY: [0.5, 1, { start: 0.6, end: 0.65 }],
-            //         pinC_scaleY: [0.5, 1, { start: 0.87, end: 0.92 }]
+
             //     }
                 
             // },
@@ -87,22 +67,38 @@
                 heightNum: 5,
                 scrollHeight: 0,                
                 objs: {
-                    container: document.querySelector('#scroll-section-3'),
-                    canvasCaption: document.querySelector('.canvas-caption')
+                    container: document.querySelector('#scroll-section-2'),
+                    canvasCaption: document.querySelector('.canvas-caption'),
+                    canvas: document.querySelector('.image-blend-canvas'),
+                    context:document.querySelector('.image-blend-canvas').getContext('2d'),
+                    imgsPath : [
+                        './img/blend-image-1.jpg',
+                        './img/blend-imgae-2.jpg'
+                    ],
+                    images: []
+                },
+                values: {
+                    rect1X: [0, 0, { start: 0, end: 0}],
+                    rect2X: [0, 0, { start: 0, end: 0}]
                 }
-                
             }
         ];
         
 
         window.addEventListener('resize', setLayout); //창 resize시 setLayout 수행
-        window.addEventListener('load', setLayout); //resource load 후 콜백 setLayout 수행
+        //resource load 후 콜백 setLayout 수행
+        window.addEventListener('load', () => {
+            setLayout();
+            // setCanvasImages();
+            SectionInfo[0].objs.context.drawImage(SectionInfo[0].objs.videoImages[0], 0, 0);
+        });
         setLayout();
         setCanvasImages();
         window.addEventListener('scroll', () => {
             yOffset = window.pageYOffset;
             onScrollLoop();
         });
+
         const scrollHeight = SectionInfo[currentSection].scrollHeight;
 
         // 새로고침해도 sticky-elem들이 남아있게 하기 위해
@@ -135,10 +131,10 @@
 
         function onScrollLoop() {
             isEnterNewSection = false;
-            if (yOffset === 0) {
-                document.body.removeAttribute('id');
-                return;
-            }
+            // if (yOffset === 0) {
+            //     document.body.removeAttribute('id');
+            //     return;
+            // }
             prevScrollHeight = 0;
             calcPrevScrollHeightSum();
 
@@ -172,11 +168,16 @@
             const values = SectionInfo[currentSection].values;
             const currentYOffset = yOffset - prevScrollHeight; // 여기가 음수 되는 원인
             const scrollRatio = currentYOffset / scrollHeight; // current Section에서 얼만큼 스크롤 했는지 비율
-            console.log(scrollRatio);
+            
             switch (currentSection) {
                 case 0:
+                    // 이미지를 캔버스에 그리기
+                    let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
+                    objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                    
                     if (scrollRatio <= 0.22) {
                         // in
+                        objs.canvas.style.opacity = calcValues(values.canvas_opacity_in, currentYOffset);
                         objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currentYOffset);
                         objs.messageA.style.transform = `translate3d(0, ${calcValues(values.messageA_translateY_in, currentYOffset)}%, 0)`;
                     } else {
@@ -184,7 +185,7 @@
                         objs.messageA.style.opacity = calcValues(values.messageA_opacity_out, currentYOffset);
                         objs.messageA.style.transform = `translate3d(0, ${calcValues(values.messageA_translateY_out, currentYOffset)}%, 0)`;
                     }
-        
+                    
                     if (scrollRatio <= 0.42) {
                         // in
                         objs.messageB.style.opacity = calcValues(values.messageB_opacity_in, currentYOffset);
@@ -204,7 +205,7 @@
                         objs.messageC.style.opacity = calcValues(values.messageC_opacity_out, currentYOffset);
                         objs.messageC.style.transform = `translate3d(0, ${calcValues(values.messageC_translateY_out, currentYOffset)}%, 0)`;
                     }
-        
+                    
                     if (scrollRatio <= 0.82) {
                         // in
                         objs.messageD.style.opacity = calcValues(values.messageD_opacity_in, currentYOffset);
@@ -213,19 +214,45 @@
                         // out
                         objs.messageD.style.opacity = calcValues(values.messageD_opacity_out, currentYOffset);
                         objs.messageD.style.transform = `translate3d(0, ${calcValues(values.messageD_translateY_out, currentYOffset)}%, 0)`;
+                        objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currentYOffset);
                     }
-                    // 이미지를 캔버스에 그리기
-                    // SectionInfo[0].objs.context.drawImage();
-                    let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
-                    objs.context.drawImage(objs.videoImages[sequence], 0, 0);
                     break;
                 case 2:
-                    break;
-                case 3:
+                    const widthRatio = window.innerWidth / objs.canvas.width;
+                    const heightRatio = window.innerHeight / objs.canvas.height;
+                    let canvasScaleRatio;
+
+                    // 비율에 따라 캔버스의 크기 조절이 달라지게 만듦
+                    if (widthRatio <= heightRatio) {
+                        // 캔버스보다 브라우저 창이 홀쭉한 경우 높이에 맞춤
+                        canvasScaleRatio = heightRatio;
+                        console.log('현재 높이에 맞춤');
+                    } else {
+                        // 캔버스보다 브라우저 창이 납작한 경우 너비에 맞춤
+                        canvasScaleRatio = widthRatio;
+                        console.log('현재는 너비에 맞춤');
+
+                    }
+                    objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
+                    objs.context.drawImage(objs.images[0], 0, 0);
+
+                    const recalculatedInnerWidth = window.innerWidth / canvasScaleRatio;
+                    const recalculatedInnerHeight = window.innerHeight / canvasScaleRatio;
+                    
+                    // canvas 양 옆에 들어갈 박스 두 개
+                    const whiteRectWidth = recalculatedInnerWidth * 0.15;
+                    values.rect1X[0] = (objs.canvas.width - recalculatedInnerWidth) / 2;
+                    values.rect1X[1] = values.rect1X[0] - whiteRectWidth;
+                    values.rect2X[0] = values.rect1X[0] + recalculatedInnerWidth - whiteRectWidth;
+                    values.rect2X[1] = values.rect1X[0] + whiteRectWidth;
+
+                    // 애니메이션 되기 전 초기값 세팅
+                    objs.context.fillRect(values.rect1X[0], 0, parseInt(whiteRectWidth), recalculatedInnerHeight);
+                    objs.context.fillRect(values.rect2X[0], 0, parseInt(whiteRectWidth), recalculatedInnerHeight);
+
                     break;
             }
         }
-        
         
         // 범위 계산 함수
         function calcValues(values, currentYOffset) {
@@ -249,7 +276,6 @@
             }
             return rv;
         }
-
         // videoImages 배열에 이미지 엘리먼트 넣기
         function setCanvasImages() {
             let imgElem;
@@ -257,6 +283,12 @@
                 imgElem = new Image();
                 imgElem.src = `./video/001/IMG_${6726 + i}.jpg`
                 SectionInfo[0].objs.videoImages.push(imgElem);
+            }
+            let imgElem2;
+            for (let i = 0 ; i < SectionInfo[2].objs.imgsPath.length ; i ++) {
+                imgElem2 = new Image();
+                imgElem2.src = SectionInfo[2].objs.imgsPath[i];
+                SectionInfo[2].objs.images.push(imgElem2);
             }
         }
     }
