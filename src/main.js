@@ -5,12 +5,15 @@
         let prevScrollHeight = 0; // 현재 보고있는 섹션 이전 섹션들의 scrollHeight 총합
         let currentSection = 0; // 현재 활성화된 section number
         let isEnterNewSection = false; // 새로운 섹션에 진입한 순간 true
+
+        const CANVAS_WIDTH = 1920;
+        const CANVAS_HEIGHT = 1080;
         
         const SectionInfo = [
             {   // 각 기기가 가진 높이를 고려하기 위해 heightNum이라는 가중치를 주기로 함
                 // section 0
                 type: 'sticky',
-                heightNum: 5, // 브라우저 높이의 5배로 scrollHeight 세팅
+                heightNum: 6, // 브라우저 높이의 5배로 scrollHeight 세팅
                 scrollHeight: 0,
                 objs: {
                     container: document.querySelector('#scroll-section-0'),
@@ -19,13 +22,12 @@
                     messageC: document.querySelector('#scroll-section-0 .main-message.c'),
                     messageD: document.querySelector('#scroll-section-0 .main-message.d'),
                     canvas: document.querySelector('#video-canvas'),
-                    canvasDiv: document.querySelector('.sticky-elem-canvas'),
                     context: document.querySelector('#video-canvas').getContext('2d'),
                     videoImages: []
                 },
                 values: {
-                    videoImageCount: 300,
-                    imageSequence: [0, 299],
+                    videoImageCount: 484,
+                    imageSequence: [0, 485],
                     // [첫범위, 끝범위, {첫좌표ratio, 끝좌표ratio}]
                     canvas_opacity_in: [0, 1, {start: 0.1, end : 0.2}],
                     canvas_opacity_out: [1, 0, {start: 0.85, end : 0.95}],
@@ -57,11 +59,6 @@
                 values: {
                 }
             },
-            // {   // 2
-
-            //     }
-                
-            // },
             {   // section 2
                 type: 'sticky',
                 heightNum: 5,
@@ -79,32 +76,37 @@
                 },
                 values: {
                     rect1X: [0, 0, { start: 0, end: 0}],
-                    rect2X: [0, 0, { start: 0, end: 0}]
+                    rect2X: [0, 0, { start: 0, end: 0}],
+                    blendHeight: [ 0, 0, { start: 0, end: 0 } ],
+                    canvas_scale: [ 0, 0, { start: 0, end: 0 } ],
+                    canvasCaption_opacity: [ 0, 1, { start: 0, end: 0 } ],
+                    canvasCaption_translateY: [ 20, 0, { start: 0, end: 0 } ],
+                    rectStartY: 0
                 }
             }
         ];
         
-
-        window.addEventListener('resize', setLayout); //창 resize시 setLayout 수행
-        //resource load 후 콜백 setLayout 수행
-        window.addEventListener('load', () => {
-            setLayout();
-            // setCanvasImages();
-            SectionInfo[0].objs.context.drawImage(SectionInfo[0].objs.videoImages[0], 0, 0);
-        });
         setLayout();
         setCanvasImages();
+
+        //창 resize시 setLayout 수행
+        window.addEventListener('resize', setLayout);
+
+        // resource load 후 콜백 setLayout 수행
+        window.addEventListener('load', () => {
+            setLayout();
+        });
+
         window.addEventListener('scroll', () => {
             yOffset = window.pageYOffset;
             onScrollLoop();
         });
 
-        const scrollHeight = SectionInfo[currentSection].scrollHeight;
 
         // 새로고침해도 sticky-elem들이 남아있게 하기 위해
         // 초기화 할 때 실행되는 함수
-        function setLayout() {
-            // 각 스크롤 섹션의 height 세팅
+        function setLayout() {  
+            // 1. 각 scroll section의 height 지정
             for (let i = 0 ; i < SectionInfo.length; i ++) {
                 if (SectionInfo[i].type === 'sticky') {
                     SectionInfo[i].scrollHeight = SectionInfo[i].heightNum * window.innerHeight;
@@ -114,7 +116,7 @@
                 }
             }
             yOffset = window.pageYOffset;
-            // totalScrollHeight과 현재 스크롤 위치를 비교해서 currentSection setting
+            // 2. totalScrollHeight과 현재 스크롤 위치를 비교해서 current Section setting
             let totalScrollHeight = 0;
             for (let i = 0; i < SectionInfo.length; i++) {
                 totalScrollHeight += SectionInfo[i].scrollHeight;
@@ -124,49 +126,64 @@
                 }
                 document.body.setAttribute('id', `show-scene-${currentSection}`);
             }
-            //canvas scale 조정
-            const heightRatio = window.innerHeight / 1080;
+            // 3. canvas scale, 위치 조정
+            const heightRatio = window.innerHeight / CANVAS_HEIGHT;
             SectionInfo[0].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`;
+        }
+
+        // videoImages 배열에 image elements 넣기
+        function setCanvasImages() {
+            let imgElem;
+            for (let i = 1; i <= SectionInfo[0].values.videoImageCount ; i ++) {
+                imgElem = new Image();
+                imgElem.src = `./video/001/ballet (${i}).jpg`
+                SectionInfo[0].objs.videoImages.push(imgElem);
+            }
+            console.log(SectionInfo[0].objs.videoImages);
+            let imgElem2;
+            for (let i = 0 ; i < SectionInfo[2].objs.imgsPath.length ; i ++) {
+                imgElem2 = new Image();
+                imgElem2.src = SectionInfo[2].objs.imgsPath[i];
+                SectionInfo[2].objs.images.push(imgElem2);
+            }
         }
 
         function onScrollLoop() {
             isEnterNewSection = false;
-            // if (yOffset === 0) {
-            //     document.body.removeAttribute('id');
-            //     return;
-            // }
             prevScrollHeight = 0;
-            calcPrevScrollHeightSum();
+            prevScrollHeightSum();
 
-            // yOFfset이 prevScrollHeight보다 크거나 같아지면 currentSection ++
+            // yOffset과 prevScrollHeight 비교해서 currentSection 판별 (스크롤 내릴 때)
             if (yOffset >= prevScrollHeight + SectionInfo[currentSection].scrollHeight) {
                 isEnterNewSection = true;
                 currentSection++;
-            }
-            if (yOffset < prevScrollHeight) {
+            } else if (yOffset < prevScrollHeight) { // 스크롤 올릴 때
                 if (currentSection === 0) return;
                 isEnterNewSection = true;
                 currentSection--;
             }
             document.body.setAttribute('id', `show-scene-${currentSection}`);
-            if (isEnterNewSection) return; // currentSection 바뀌는 순간 예상치 못한 음수 값이 출력되므로 그 찰나에만 함수를 return하게 해줌
+
+            // currentSection 바뀌는 순간 예상치 못한 음수 값이 출력되므로 그 찰나에만 함수를 return하게 해줌
+            if (isEnterNewSection) return;
             playAnimation();
         }
 
         // 이전 섹션의 ScrollHeight 합
-        function calcPrevScrollHeightSum() {
+        function prevScrollHeightSum() {
             for (let i = 0 ; i < currentSection ; i ++ ) {
                 prevScrollHeight += SectionInfo[i].scrollHeight;
             }
             return prevScrollHeight;
         }
         
+        const scrollHeight = SectionInfo[currentSection].scrollHeight;
+
         // 한 section 내부에서의 재생될 애니메이션에 관한 함수
         function playAnimation() {
-            console.log('playAni fucntion');
             const objs = SectionInfo[currentSection].objs;
             const values = SectionInfo[currentSection].values;
-            const currentYOffset = yOffset - prevScrollHeight; // 여기가 음수 되는 원인
+            const currentYOffset = yOffset - prevScrollHeight; // veiwPort에서 current section 까지의 거리 (px)
             const scrollRatio = currentYOffset / scrollHeight; // current Section에서 얼만큼 스크롤 했는지 비율
             
             switch (currentSection) {
@@ -217,39 +234,59 @@
                         objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currentYOffset);
                     }
                     break;
+
+                case 1:
+                    break;
+                    
                 case 2:
                     const widthRatio = window.innerWidth / objs.canvas.width;
                     const heightRatio = window.innerHeight / objs.canvas.height;
                     let canvasScaleRatio;
-
-                    // 비율에 따라 캔버스의 크기 조절이 달라지게 만듦
+                    
+                    // 비율에 따라 캔버스의 크기 조절이 달라지게
                     if (widthRatio <= heightRatio) {
                         // 캔버스보다 브라우저 창이 홀쭉한 경우 높이에 맞춤
                         canvasScaleRatio = heightRatio;
-                        console.log('현재 높이에 맞춤');
                     } else {
                         // 캔버스보다 브라우저 창이 납작한 경우 너비에 맞춤
                         canvasScaleRatio = widthRatio;
-                        console.log('현재는 너비에 맞춤');
-
                     }
+                    
+                    objs.context.fillStyle = 'white';
                     objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
                     objs.context.drawImage(objs.images[0], 0, 0);
 
-                    const recalculatedInnerWidth = window.innerWidth / canvasScaleRatio;
-                    const recalculatedInnerHeight = window.innerHeight / canvasScaleRatio;
+                    const recalculatedInnerWidth = document.body.offsetWidth / canvasScaleRatio;
                     
+                    if (!values.rectStartY) {
+                        values.rectStartY = objs.canvas.offsetTop + (objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2;
+                        values.rect1X[2].start = (window.innerHeight / 2) / scrollHeight;
+                        values.rect2X[2].start = (window.innerHeight / 2) / scrollHeight;
+                        
+                        values.rect1X[2].end = values.rectStartY / scrollHeight;
+                        values.rect2X[2].end = values.rectStartY / scrollHeight;
+                    }
+
                     // canvas 양 옆에 들어갈 박스 두 개
                     const whiteRectWidth = recalculatedInnerWidth * 0.15;
                     values.rect1X[0] = (objs.canvas.width - recalculatedInnerWidth) / 2;
                     values.rect1X[1] = values.rect1X[0] - whiteRectWidth;
+
                     values.rect2X[0] = values.rect1X[0] + recalculatedInnerWidth - whiteRectWidth;
-                    values.rect2X[1] = values.rect1X[0] + whiteRectWidth;
+                    values.rect2X[1] = values.rect2X[0] + whiteRectWidth;
 
-                    // 애니메이션 되기 전 초기값 세팅
-                    objs.context.fillRect(values.rect1X[0], 0, parseInt(whiteRectWidth), recalculatedInnerHeight);
-                    objs.context.fillRect(values.rect2X[0], 0, parseInt(whiteRectWidth), recalculatedInnerHeight);
+                    // 좌우 흰색 박스 그리기
+                    objs.context.fillRect(
+					parseInt(calcValues(values.rect1X, currentYOffset)),
+                    0,
+                    parseInt(whiteRectWidth),
+					objs.canvas.height);
 
+                    objs.context.fillRect(
+                    parseInt(calcValues(values.rect2X, currentYOffset)),
+                    0,
+                    parseInt(whiteRectWidth),
+                    objs.canvas.height);
                     break;
             }
         }
@@ -276,21 +313,7 @@
             }
             return rv;
         }
-        // videoImages 배열에 이미지 엘리먼트 넣기
-        function setCanvasImages() {
-            let imgElem;
-            for (let i = 0; i < SectionInfo[0].values.videoImageCount ; i ++) {
-                imgElem = new Image();
-                imgElem.src = `./video/001/IMG_${6726 + i}.jpg`
-                SectionInfo[0].objs.videoImages.push(imgElem);
-            }
-            let imgElem2;
-            for (let i = 0 ; i < SectionInfo[2].objs.imgsPath.length ; i ++) {
-                imgElem2 = new Image();
-                imgElem2.src = SectionInfo[2].objs.imgsPath[i];
-                SectionInfo[2].objs.images.push(imgElem2);
-            }
-        }
+
     }
 
 )();
