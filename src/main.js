@@ -10,7 +10,7 @@
         const CANVAS_HEIGHT = 1080;
 
         const navigation = document.querySelector('.local-nav');
-        
+
         const SectionInfo = [
             {   // 각 기기가 가진 높이를 고려하기 위해 heightNum이라는 가중치를 주기로 함
                 // section 0
@@ -56,7 +56,17 @@
                 scrollHeight: 0,
                 objs: {
                     container: document.querySelector('#scroll-section-1'),
-                    content: document.querySelector('#scroll-section-1 .description')
+                    content: document.querySelector('#scroll-section-1 .description'),
+                    previewImgs: document.querySelectorAll('.img-preview'),
+                    modal: document.querySelector('#img-modal'),
+                    modalContent : document.querySelector('.modal-content'),
+                    modalImgsPath: [
+                        './img/ski-modal.jpg',
+                        './img/art-modal.jpg',
+                        './img/animal-modal.jpg',
+                    ],
+                    modal: document.querySelector('#img-modal'),
+                    modalCloseBtn: document.querySelector('#img-modal .close')
                 },
                 values: {
                 }
@@ -104,6 +114,18 @@
             onScrollLoop();
         });
 
+        // 모달 팝업 이벤트 리스너
+        SectionInfo[1].objs.previewImgs.forEach(element => {
+            element.addEventListener('click', e => {
+                const targetNum = e.target.dataset.modal;
+                SectionInfo[1].objs.modal.style.display = 'block';
+                SectionInfo[1].objs.modalContent.src = SectionInfo[1].objs.modalImgsPath[targetNum];
+            });
+        });
+
+        SectionInfo[1].objs.modalCloseBtn.addEventListener('click', () => {
+            SectionInfo[1].objs.modal.style.display = 'none';
+        })
 
         // 새로고침해도 sticky-elem들이 남아있게 하기 위해
         // 초기화 할 때 실행되는 함수
@@ -308,7 +330,6 @@
                         step = 2;
                         objs.canvas.classList.add('sticky');
                         objs.canvas.style.top = `-${(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
-                        objs.canvas.style.zIndex = -1;
                         objs.canvas.style.opacity = 1 - (scrollRatio * 2);
                     }
                     
