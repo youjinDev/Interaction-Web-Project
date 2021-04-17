@@ -10,6 +10,7 @@
         const CANVAS_HEIGHT = 1080;
 
         const navigation = document.querySelector('.local-nav');
+        const topBtn = document.querySelector('.footer i');
 
         const SectionInfo = [
             {   // 각 기기가 가진 높이를 고려하기 위해 heightNum이라는 가중치를 주기로 함
@@ -32,7 +33,7 @@
                     imageSequence: [0, 485],
                     // [첫범위, 끝범위, {첫좌표ratio, 끝좌표ratio}]
                     canvas_opacity_in: [0, 1, {start: 0.1, end : 0.2}],
-                    canvas_opacity_out: [1, 0, {start: 0.85, end : 0.95}],
+                    canvas_opacity_out: [1, 0, {start: 0.85, end : 0.99}],
                     messageA_opacity_in: [0, 1, { start: 0.1, end: 0.2 }],
                     messageB_opacity_in: [0, 1, { start: 0.3, end: 0.4 }],
                     messageC_opacity_in: [0, 1, { start: 0.5, end: 0.6 }],
@@ -65,7 +66,6 @@
                         './img/art-modal.jpg',
                         './img/animal-modal.jpg',
                     ],
-                    modal: document.querySelector('#img-modal'),
                     modalCloseBtn: document.querySelector('#img-modal .close')
                 },
                 values: {
@@ -125,6 +125,10 @@
 
         SectionInfo[1].objs.modalCloseBtn.addEventListener('click', () => {
             SectionInfo[1].objs.modal.style.display = 'none';
+        });
+
+        topBtn.addEventListener('click', () => {
+            SectionInfo[0].objs.container.scrollIntoView({behavior: "smooth"});
         })
 
         // 새로고침해도 sticky-elem들이 남아있게 하기 위해

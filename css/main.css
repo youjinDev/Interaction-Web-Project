@@ -230,6 +230,12 @@ a {
   background-color: darkseagreen;
 }
 
+.footer i {
+  font-size: 3rem;
+  color: white;
+  cursor: pointer;
+}
+
 @media (min-width: 1024px) {
   #scroll-section-0 .title {
     font-size: 10vw;
