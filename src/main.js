@@ -8,6 +8,8 @@
 
         const CANVAS_WIDTH = 1920;
         const CANVAS_HEIGHT = 1080;
+
+        const navigation = document.querySelector('.local-nav');
         
         const SectionInfo = [
             {   // 각 기기가 가진 높이를 고려하기 위해 heightNum이라는 가중치를 주기로 함
@@ -65,9 +67,9 @@
                 scrollHeight: 0,                
                 objs: {
                     container: document.querySelector('#scroll-section-2'),
-                    canvasCaption: document.querySelector('.canvas-caption'),
                     canvas: document.querySelector('.image-blend-canvas'),
-                    context:document.querySelector('.image-blend-canvas').getContext('2d'),
+                    canvasCaption: document.querySelector('.canvas-caption'),
+                    context: document.querySelector('.image-blend-canvas').getContext('2d'),
                     imgsPath : [
                         './img/blend-image-1.jpg',
                         './img/blend-imgae-2.jpg'
@@ -80,7 +82,7 @@
                     blendHeight: [ 0, 0, { start: 0, end: 0 } ],
                     canvas_scale: [ 0, 0, { start: 0, end: 0 } ],
                     canvasCaption_opacity: [ 0, 1, { start: 0, end: 0 } ],
-                    canvasCaption_translateY: [ 20, 0, { start: 0, end: 0 } ],
+                    canvasCaption_translateY: [ 50, 0, { start: 0.5, end: 0.9 } ],
                     rectStartY: 0
                 }
             }
@@ -139,7 +141,6 @@
                 imgElem.src = `./video/001/ballet (${i}).jpg`
                 SectionInfo[0].objs.videoImages.push(imgElem);
             }
-            console.log(SectionInfo[0].objs.videoImages);
             let imgElem2;
             for (let i = 0 ; i < SectionInfo[2].objs.imgsPath.length ; i ++) {
                 imgElem2 = new Image();
@@ -192,6 +193,14 @@
                     let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
                     objs.context.drawImage(objs.videoImages[sequence], 0, 0);
                     
+                    if (scrollRatio < 0.1) {
+                        navigation.classList.remove('invisible');
+                    }
+
+                    if (scrollRatio >= 0.165) {
+                        navigation.classList.add('invisible');
+                    }
+
                     if (scrollRatio <= 0.22) {
                         // in
                         objs.canvas.style.opacity = calcValues(values.canvas_opacity_in, currentYOffset);
@@ -233,6 +242,7 @@
                         objs.messageD.style.transform = `translate3d(0, ${calcValues(values.messageD_translateY_out, currentYOffset)}%, 0)`;
                         objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currentYOffset);
                     }
+                    if (scrollRatio > 0.9) navigation.classList.remove('invisible');
                     break;
 
                 case 1:
@@ -242,7 +252,8 @@
                     const widthRatio = window.innerWidth / objs.canvas.width;
                     const heightRatio = window.innerHeight / objs.canvas.height;
                     let canvasScaleRatio;
-                    
+                    let step;
+
                     // 비율에 따라 캔버스의 크기 조절이 달라지게
                     if (widthRatio <= heightRatio) {
                         // 캔버스보다 브라우저 창이 홀쭉한 경우 높이에 맞춤
@@ -277,16 +288,30 @@
 
                     // 좌우 흰색 박스 그리기
                     objs.context.fillRect(
-					parseInt(calcValues(values.rect1X, currentYOffset)),
+					calcValues(values.rect1X, currentYOffset),
                     0,
-                    parseInt(whiteRectWidth),
+                    whiteRectWidth,
 					objs.canvas.height);
 
                     objs.context.fillRect(
-                    parseInt(calcValues(values.rect2X, currentYOffset)),
+                    calcValues(values.rect2X, currentYOffset),
                     0,
-                    parseInt(whiteRectWidth),
+                    whiteRectWidth,
                     objs.canvas.height);
+
+                    //캔버스가 브라우저 상단에 닿지 않았다면
+                    if (scrollRatio < values.rect1X[2].end) {
+                        step = 1;
+                        objs.canvas.classList.remove('sticky');
+                        objs.canvas.style.opacity = 1;
+                    } else { //상단에 닿은 이후
+                        step = 2;
+                        objs.canvas.classList.add('sticky');
+                        objs.canvas.style.top = `-${(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
+                        objs.canvas.style.zIndex = -1;
+                        objs.canvas.style.opacity = 1 - (scrollRatio * 2);
+                    }
+                    
                     break;
             }
         }
