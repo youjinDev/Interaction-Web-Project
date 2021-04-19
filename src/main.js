@@ -14,12 +14,14 @@
         const CANVAS_WIDTH = 1920;
         const CANVAS_HEIGHT = 1080;
 
+        const loadingPage = document.querySelector('.loading-page');
+
         const navigation = document.querySelector('.local-nav');
         const navLinks = document.querySelector('.local-nav-links');
         const topBtn = document.querySelector('.footer i');
 
         const sectionInfo = [
-            {   // 각 기기가 가진 높이를 고려하기 위해 heightNum이라는 가중치를 주기로 함
+            {
                 // section 0
                 type: 'sticky',
                 heightNum: 6, // 브라우저 높이의 5배로 scrollHeight 세팅
@@ -108,11 +110,13 @@
 
         //창 resize시 setLayout 수행
         window.addEventListener('resize', setLayout);
+        window.addEventListener('orientationchange', setLayout);
 
         // resource load 후 콜백 setLayout 수행
         window.addEventListener('load', () => {
+            loadingPage.style.opacity = 0;
+            loadingPage.style.display = 'none';
             setLayout();
-            // setCanvasImages();
         });
 
         window.addEventListener('scroll', () => {
@@ -131,7 +135,12 @@
             if (link === undefined) {
                 return;
             }
-            sectionInfo[link].objs.container.scrollIntoView();
+            
+            if (link === '2') {
+                sectionInfo[link].objs.container.scrollIntoView({block: "end"});
+            } else {
+                sectionInfo[link].objs.container.scrollIntoView();
+            }
         })
 
         // 모달 팝업 이벤트 리스너
@@ -179,8 +188,9 @@
             sectionInfo[0].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`;
         }
 
-        // videoImages 배열에 image elements 넣기
+        // canvas로 그릴 이미지 객체 미리 생성하기
         function setCanvasImages() {
+            // section 0 imgs
             let imgElem;
             for (let i = 1; i <= sectionInfo[0].values.videoImageCount ; i ++) {
                 imgElem = new Image();
@@ -188,6 +198,7 @@
                 sectionInfo[0].objs.videoImages.push(imgElem);
             }
 
+            // section 2 imgs
             let imgElem2 = new Image();
             imgElem2.src = sectionInfo[2].objs.imgsPath[0];
             sectionInfo[2].objs.images.push(imgElem2);

@@ -242,6 +242,57 @@ a {
   transition: 0.3s;
 }
 
+.loading-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: white;
+  opacity: 1;
+  transition: 0.5s;
+}
+
+.loading-circle {
+  width: 54px;
+  height: 54px;
+  animation: spin 3s infinite;
+}
+
+.loading-circle circle {
+  stroke: gold;
+  stroke-width: 4;
+  stroke-dasharray: 157, 157;
+  stroke-dashoffset: 0;
+  fill: none;
+  animation: loading-circle-animation 1s infinite;
+  transition: 1s;
+}
+
+.before-load {
+  /* opacity: 0; */
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-circle-animation {
+  0% {
+    stroke-dashoffset: 157;
+  }
+  75% {
+    stroke-dashoffset: -147;
+  }
+  100% {
+    stroke-dashoffset: -157;
+  }
+}
+
 @media (min-width: 1024px) {
   #scroll-section-0 .title {
     font-size: 10vw;
