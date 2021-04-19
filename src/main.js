@@ -6,13 +6,19 @@
         let currentSection = 0; // 현재 활성화된 section number
         let isEnterNewSection = false; // 새로운 섹션에 진입한 순간 true
 
+        let delayedYOffset = 0;
+        let rafId;
+        let rafState;
+        let acc = 0.1;
+
         const CANVAS_WIDTH = 1920;
         const CANVAS_HEIGHT = 1080;
 
         const navigation = document.querySelector('.local-nav');
+        const navLinks = document.querySelector('.local-nav-links');
         const topBtn = document.querySelector('.footer i');
 
-        const SectionInfo = [
+        const sectionInfo = [
             {   // 각 기기가 가진 높이를 고려하기 위해 heightNum이라는 가중치를 주기로 함
                 // section 0
                 type: 'sticky',
@@ -73,7 +79,7 @@
             },
             {   // section 2
                 type: 'sticky',
-                heightNum: 5,
+                heightNum: 4,
                 scrollHeight: 0,                
                 objs: {
                     container: document.querySelector('#scroll-section-2'),
@@ -112,42 +118,56 @@
         window.addEventListener('scroll', () => {
             yOffset = window.pageYOffset;
             onScrollLoop();
+
+            if (!rafState) {
+                rafId = requestAnimationFrame(loop);
+                rafState = true;
+            }
         });
 
+        // navigation link 클릭시 섹션 이동
+        navLinks.addEventListener('click', (e) => {
+            const link = e.target.dataset.link;
+            if (link === null) {
+                return;
+            }
+            sectionInfo[link].objs.container.scrollIntoView();
+        })
+
         // 모달 팝업 이벤트 리스너
-        SectionInfo[1].objs.previewImgs.forEach(element => {
+        sectionInfo[1].objs.previewImgs.forEach(element => {
             element.addEventListener('click', e => {
                 const targetNum = e.target.dataset.modal;
-                SectionInfo[1].objs.modal.style.display = 'block';
-                SectionInfo[1].objs.modalContent.src = SectionInfo[1].objs.modalImgsPath[targetNum];
+                sectionInfo[1].objs.modal.style.display = 'block';
+                sectionInfo[1].objs.modalContent.src = sectionInfo[1].objs.modalImgsPath[targetNum];
             });
         });
 
-        SectionInfo[1].objs.modalCloseBtn.addEventListener('click', () => {
-            SectionInfo[1].objs.modal.style.display = 'none';
+        sectionInfo[1].objs.modalCloseBtn.addEventListener('click', () => {
+            sectionInfo[1].objs.modal.style.display = 'none';
         });
 
         topBtn.addEventListener('click', () => {
-            SectionInfo[0].objs.container.scrollIntoView({behavior: "smooth"});
+            sectionInfo[0].objs.container.scrollIntoView();
         })
 
         // 새로고침해도 sticky-elem들이 남아있게 하기 위해
         // 초기화 할 때 실행되는 함수
         function setLayout() {  
             // 1. 각 scroll section의 height 지정
-            for (let i = 0 ; i < SectionInfo.length; i ++) {
-                if (SectionInfo[i].type === 'sticky') {
-                    SectionInfo[i].scrollHeight = SectionInfo[i].heightNum * window.innerHeight;
-                    SectionInfo[i].objs.container.style.height = `${SectionInfo[i].scrollHeight}px`;
+            for (let i = 0 ; i < sectionInfo.length; i ++) {
+                if (sectionInfo[i].type === 'sticky') {
+                    sectionInfo[i].scrollHeight = sectionInfo[i].heightNum * window.innerHeight;
+                    sectionInfo[i].objs.container.style.height = `${sectionInfo[i].scrollHeight}px`;
                 } else {// normal type
-                    SectionInfo[i].scrollHeight = SectionInfo[i].objs.container.offsetHeight;
+                    sectionInfo[i].scrollHeight = sectionInfo[i].objs.container.offsetHeight;
                 }
             }
-            yOffset = window.pageYOffset;
             // 2. totalScrollHeight과 현재 스크롤 위치를 비교해서 current Section setting
+            yOffset = window.pageYOffset;
             let totalScrollHeight = 0;
-            for (let i = 0; i < SectionInfo.length; i++) {
-                totalScrollHeight += SectionInfo[i].scrollHeight;
+            for (let i = 0; i < sectionInfo.length; i++) {
+                totalScrollHeight += sectionInfo[i].scrollHeight;
                 if (totalScrollHeight >= yOffset) {
                     currentSection = i;
                     break;
@@ -156,22 +176,22 @@
             }
             // 3. canvas scale, 위치 조정
             const heightRatio = window.innerHeight / CANVAS_HEIGHT;
-            SectionInfo[0].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`;
+            sectionInfo[0].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`;
         }
 
         // videoImages 배열에 image elements 넣기
         function setCanvasImages() {
             let imgElem;
-            for (let i = 1; i <= SectionInfo[0].values.videoImageCount ; i ++) {
+            for (let i = 1; i <= sectionInfo[0].values.videoImageCount ; i ++) {
                 imgElem = new Image();
                 imgElem.src = `./video/001/ballet (${i}).jpg`
-                SectionInfo[0].objs.videoImages.push(imgElem);
+                sectionInfo[0].objs.videoImages.push(imgElem);
             }
             let imgElem2;
-            for (let i = 0 ; i < SectionInfo[2].objs.imgsPath.length ; i ++) {
+            for (let i = 0 ; i < sectionInfo[2].objs.imgsPath.length ; i ++) {
                 imgElem2 = new Image();
-                imgElem2.src = SectionInfo[2].objs.imgsPath[i];
-                SectionInfo[2].objs.images.push(imgElem2);
+                imgElem2.src = sectionInfo[2].objs.imgsPath[i];
+                sectionInfo[2].objs.images.push(imgElem2);
             }
         }
 
@@ -181,7 +201,7 @@
             prevScrollHeightSum();
 
             // yOffset과 prevScrollHeight 비교해서 currentSection 판별 (스크롤 내릴 때)
-            if (yOffset >= prevScrollHeight + SectionInfo[currentSection].scrollHeight) {
+            if (yOffset >= prevScrollHeight + sectionInfo[currentSection].scrollHeight) {
                 isEnterNewSection = true;
                 currentSection++;
             } else if (yOffset < prevScrollHeight) { // 스크롤 올릴 때
@@ -190,7 +210,7 @@
                 currentSection--;
             }
             document.body.setAttribute('id', `show-scene-${currentSection}`);
-
+            
             // currentSection 바뀌는 순간 예상치 못한 음수 값이 출력되므로 그 찰나에만 함수를 return하게 해줌
             if (isEnterNewSection) return;
             playAnimation();
@@ -199,25 +219,50 @@
         // 이전 섹션의 ScrollHeight 합
         function prevScrollHeightSum() {
             for (let i = 0 ; i < currentSection ; i ++ ) {
-                prevScrollHeight += SectionInfo[i].scrollHeight;
+                prevScrollHeight += sectionInfo[i].scrollHeight;
             }
             return prevScrollHeight;
         }
+
+        function loop() {
+            // 감속을 위한 계산식
+            delayedYOffset = delayedYOffset + (yOffset - delayedYOffset) * acc;
+
+            if (!isEnterNewSection) {
+                const currentYOffset = delayedYOffset - prevScrollHeight;
+                const values = sectionInfo[currentSection].values;
+                const objs = sectionInfo[currentSection].objs;
+
+                if (currentSection === 0) {
+                    let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
+                    if (objs.videoImages[sequence]) {
+                        objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                    }
+                }
+            }
+
+            rafId = requestAnimationFrame(loop);
+
+            if (Math.abs(yOffset - delayedYOffset) < 1) {
+                cancelAnimationFrame(rafId);
+                rafState = false;
+            }
+        }
         
-        const scrollHeight = SectionInfo[currentSection].scrollHeight;
+        const scrollHeight = sectionInfo[currentSection].scrollHeight;
 
         // 한 section 내부에서의 재생될 애니메이션에 관한 함수
         function playAnimation() {
-            const objs = SectionInfo[currentSection].objs;
-            const values = SectionInfo[currentSection].values;
+            const objs = sectionInfo[currentSection].objs;
+            const values = sectionInfo[currentSection].values;
             const currentYOffset = yOffset - prevScrollHeight; // veiwPort에서 current section 까지의 거리 (px)
             const scrollRatio = currentYOffset / scrollHeight; // current Section에서 얼만큼 스크롤 했는지 비율
             
             switch (currentSection) {
                 case 0:
                     // 이미지를 캔버스에 그리기
-                    let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
-                    objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                    // let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
+                    // objs.context.drawImage(objs.videoImages[sequence], 0, 0);
                     
                     if (scrollRatio < 0.1) {
                         navigation.classList.remove('invisible');
@@ -268,6 +313,7 @@
                         objs.messageD.style.transform = `translate3d(0, ${calcValues(values.messageD_translateY_out, currentYOffset)}%, 0)`;
                         objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currentYOffset);
                     }
+
                     if (scrollRatio > 0.9) navigation.classList.remove('invisible');
                     break;
 
@@ -278,7 +324,6 @@
                     const widthRatio = window.innerWidth / objs.canvas.width;
                     const heightRatio = window.innerHeight / objs.canvas.height;
                     let canvasScaleRatio;
-                    let step;
 
                     // 비율에 따라 캔버스의 크기 조절이 달라지게
                     if (widthRatio <= heightRatio) {
@@ -327,11 +372,9 @@
 
                     //캔버스가 브라우저 상단에 닿지 않았다면
                     if (scrollRatio < values.rect1X[2].end) {
-                        step = 1;
                         objs.canvas.classList.remove('sticky');
                         objs.canvas.style.opacity = 1;
                     } else { //상단에 닿은 이후
-                        step = 2;
                         objs.canvas.classList.add('sticky');
                         objs.canvas.style.top = `-${(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
                         objs.canvas.style.opacity = 1 - (scrollRatio * 2);
@@ -344,7 +387,7 @@
         // 범위 계산 함수
         function calcValues(values, currentYOffset) {
             let rv;
-            const scrollRatio = currentYOffset / SectionInfo[currentSection].scrollHeight;
+            const scrollRatio = currentYOffset / sectionInfo[currentSection].scrollHeight;
             
             if (values.length === 3) {
                 // start~end 사이 애니메이션 실행

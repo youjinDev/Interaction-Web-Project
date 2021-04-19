@@ -118,6 +118,12 @@ a {
   padding: 30vh 0;
 }
 
+#scroll-section-1 .title {
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 10vh;
+}
+
 #scroll-section-1 .container {
   display: flex;
   flex-direction: column;
@@ -170,21 +176,22 @@ a {
 }
 
 #img-modal .close:hover,
-#img-modal .close:focus {
+#img-modal .close:focus,
+.footer i:hover {
   color: #bbb;
   text-decoration: none;
   cursor: pointer;
 }
 
 #scroll-section-1 .img-caption {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin: 1rem auto;
   background-color: white;
   width: fit-content;
 }
 
 #scroll-section-1 .img-description {
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: #888;
   margin: 0 auto;
 }
@@ -227,13 +234,12 @@ a {
   height: 8em;
   justify-content: center;
   align-items: center;
-  background-color: darkseagreen;
 }
 
 .footer i {
   font-size: 3rem;
-  color: white;
-  cursor: pointer;
+  color: #888;
+  transition: 0.3s;
 }
 
 @media (min-width: 1024px) {
@@ -254,6 +260,10 @@ a {
   #scroll-section-1 {
     background-color: whitesmoke;
     padding: 30vh auto;
+  }
+
+  #scroll-section-1 .title {
+    font-size: 4rem;
   }
 
   #scroll-section-1 .container {
