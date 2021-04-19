@@ -87,8 +87,7 @@
                     canvasCaption: document.querySelector('.canvas-caption'),
                     context: document.querySelector('.image-blend-canvas').getContext('2d'),
                     imgsPath : [
-                        './img/blend-image-1.jpg',
-                        './img/blend-imgae-2.jpg'
+                        './img/blend-image-1.jpg'
                     ],
                     images: []
                 },
@@ -113,6 +112,7 @@
         // resource load 후 콜백 setLayout 수행
         window.addEventListener('load', () => {
             setLayout();
+            // setCanvasImages();
         });
 
         window.addEventListener('scroll', () => {
@@ -128,7 +128,7 @@
         // navigation link 클릭시 섹션 이동
         navLinks.addEventListener('click', (e) => {
             const link = e.target.dataset.link;
-            if (link === null) {
+            if (link === undefined) {
                 return;
             }
             sectionInfo[link].objs.container.scrollIntoView();
@@ -163,7 +163,7 @@
                     sectionInfo[i].scrollHeight = sectionInfo[i].objs.container.offsetHeight;
                 }
             }
-            // 2. totalScrollHeight과 현재 스크롤 위치를 비교해서 current Section setting
+            // 2. totalScrollHeight과 현재 스크롤 위치를 비교해서 currentSection setting
             yOffset = window.pageYOffset;
             let totalScrollHeight = 0;
             for (let i = 0; i < sectionInfo.length; i++) {
@@ -187,12 +187,10 @@
                 imgElem.src = `./video/001/ballet (${i}).jpg`
                 sectionInfo[0].objs.videoImages.push(imgElem);
             }
-            let imgElem2;
-            for (let i = 0 ; i < sectionInfo[2].objs.imgsPath.length ; i ++) {
-                imgElem2 = new Image();
-                imgElem2.src = sectionInfo[2].objs.imgsPath[i];
-                sectionInfo[2].objs.images.push(imgElem2);
-            }
+
+            let imgElem2 = new Image();
+            imgElem2.src = sectionInfo[2].objs.imgsPath[0];
+            sectionInfo[2].objs.images.push(imgElem2);
         }
 
         function onScrollLoop() {
@@ -225,7 +223,7 @@
         }
 
         function loop() {
-            // 감속을 위한 계산식
+            // 자연스러운 감속을 위한 계산식
             delayedYOffset = delayedYOffset + (yOffset - delayedYOffset) * acc;
 
             if (!isEnterNewSection) {
@@ -240,7 +238,6 @@
                     }
                 }
             }
-
             rafId = requestAnimationFrame(loop);
 
             if (Math.abs(yOffset - delayedYOffset) < 1) {
@@ -249,8 +246,8 @@
             }
         }
         
+        
         const scrollHeight = sectionInfo[currentSection].scrollHeight;
-
         // 한 section 내부에서의 재생될 애니메이션에 관한 함수
         function playAnimation() {
             const objs = sectionInfo[currentSection].objs;
@@ -261,8 +258,6 @@
             switch (currentSection) {
                 case 0:
                     // 이미지를 캔버스에 그리기
-                    // let sequence = Math.round(calcValues(values.imageSequence, currentYOffset));
-                    // objs.context.drawImage(objs.videoImages[sequence], 0, 0);
                     
                     if (scrollRatio < 0.1) {
                         navigation.classList.remove('invisible');
@@ -318,6 +313,60 @@
                     break;
 
                 case 1:
+                    if (scrollRatio > 0.8) {
+                        const objs = sectionInfo[2].objs;
+                        const values = sectionInfo[2].values;
+                        const widthRatio = window.innerWidth / objs.canvas.width;
+                        const heightRatio = window.innerHeight / objs.canvas.height;
+                        let canvasScaleRatio;
+    
+                        // 비율에 따라 캔버스의 크기 조절이 달라지게
+                        if (widthRatio <= heightRatio) {
+                            // 캔버스보다 브라우저 창이 홀쭉한 경우 높이에 맞춤
+                            canvasScaleRatio = heightRatio;
+                        } else {
+                            // 캔버스보다 브라우저 창이 납작한 경우 너비에 맞춤
+                            canvasScaleRatio = widthRatio;
+                        }
+                        
+                        objs.context.fillStyle = 'white';
+                        objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
+                        objs.context.drawImage(objs.images[0], 0, 0);
+    
+                        const recalculatedInnerWidth = document.body.offsetWidth / canvasScaleRatio;
+    
+                        // canvas 양 옆에 들어갈 박스 두 개
+                        const whiteRectWidth = recalculatedInnerWidth * 0.15;
+                        values.rect1X[0] = (objs.canvas.width - recalculatedInnerWidth) / 2;
+                        values.rect1X[1] = values.rect1X[0] - whiteRectWidth;
+    
+                        values.rect2X[0] = values.rect1X[0] + recalculatedInnerWidth - whiteRectWidth;
+                        values.rect2X[1] = values.rect2X[0] + whiteRectWidth;
+    
+                        // 좌우 흰색 박스 그리기
+                        objs.context.fillRect(
+                        calcValues(values.rect1X, currentYOffset),
+                        0,
+                        whiteRectWidth,
+                        objs.canvas.height);
+    
+                        objs.context.fillRect(
+                        calcValues(values.rect2X, currentYOffset),
+                        0,
+                        whiteRectWidth,
+                        objs.canvas.height);
+    
+                        //캔버스가 브라우저 상단에 닿지 않았다면
+                        if (scrollRatio < values.rect1X[2].end) {
+                            objs.canvas.classList.remove('sticky');
+                            objs.canvas.style.opacity = 1;
+                        } else { //상단에 닿은 이후
+                            objs.canvas.classList.add('sticky');
+                            objs.canvas.style.top = `-${(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
+                            objs.canvas.style.opacity = 1 - (scrollRatio * 2);
+                        }
+    
+                    }
                     break;
                     
                 case 2:
