@@ -227,6 +227,13 @@ a {
   z-index: -1;
 }
 
+.btn-purchase {
+  width: 100px;
+  padding: 10px;
+  background-color: gray;
+  color: whitesmoke;
+}
+
 .footer {
   display: flex;
   font-size: 1.2rem;
@@ -252,7 +259,6 @@ a {
   z-index: 10;
   background-color: white;
   opacity: 1;
-  transition: 0.5s;
 }
 
 .loading-circle {
@@ -269,10 +275,6 @@ a {
   fill: none;
   animation: loading-circle-animation 1s infinite;
   transition: 1s;
-}
-
-.before-load {
-  /* opacity: 0; */
 }
 
 @keyframes spin {

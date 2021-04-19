@@ -108,21 +108,17 @@
         setLayout();
         setCanvasImages();
 
-        //창 resize시 setLayout 수행
         window.addEventListener('resize', setLayout);
         window.addEventListener('orientationchange', setLayout);
 
-        // resource load 후 콜백 setLayout 수행
         window.addEventListener('load', () => {
-            loadingPage.style.opacity = 0;
-            loadingPage.style.display = 'none';
+            document.querySelector('.container').removeChild(loadingPage);
             setLayout();
         });
 
         window.addEventListener('scroll', () => {
             yOffset = window.pageYOffset;
             onScrollLoop();
-
             if (!rafState) {
                 rafId = requestAnimationFrame(loop);
                 rafState = true;
@@ -324,7 +320,7 @@
                     break;
 
                 case 1:
-                    if (scrollRatio > 0.8) {
+                    if (scrollRatio > 0.9) {
                         const objs = sectionInfo[2].objs;
                         const values = sectionInfo[2].values;
                         const widthRatio = window.innerWidth / objs.canvas.width;
