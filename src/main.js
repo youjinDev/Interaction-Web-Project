@@ -11,7 +11,6 @@
         let rafState;
         let acc = 0.1;
 
-        const CANVAS_WIDTH = 1920;
         const CANVAS_HEIGHT = 1080;
 
         const loadingPage = document.querySelector('.loading-page');
@@ -125,20 +124,6 @@
             }
         });
 
-        // navigation link 클릭시 섹션 이동
-        navLinks.addEventListener('click', (e) => {
-            const link = e.target.dataset.link;
-            if (link === undefined) {
-                return;
-            }
-            
-            if (link === '2') {
-                sectionInfo[link].objs.container.scrollIntoView({block: "end"});
-            } else {
-                sectionInfo[link].objs.container.scrollIntoView();
-            }
-        })
-
         // 모달 팝업 이벤트 리스너
         sectionInfo[1].objs.previewImgs.forEach(element => {
             element.addEventListener('click', e => {
@@ -177,7 +162,7 @@
                     currentSection = i;
                     break;
                 }
-                document.body.setAttribute('id', `show-scene-${currentSection}`);
+                document.body.setAttribute('id', `show-section-${currentSection}`);
             }
             // 3. canvas scale, 위치 조정
             const heightRatio = window.innerHeight / CANVAS_HEIGHT;
@@ -214,7 +199,7 @@
                 isEnterNewSection = true;
                 currentSection--;
             }
-            document.body.setAttribute('id', `show-scene-${currentSection}`);
+            document.body.setAttribute('id', `show-section-${currentSection}`);
             
             // currentSection 바뀌는 순간 예상치 못한 음수 값이 출력되므로 그 찰나에만 함수를 return하게 해줌
             if (isEnterNewSection) return;
