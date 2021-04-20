@@ -13,10 +13,11 @@
 - CSS
  
 ## 2. 기능
-- 스크롤에 따라 이미지의 scale, opacity 등의 동적인 변화
+- 각 섹션마다 스크롤에 따라 이미지의 scale, opacity 등의 동적인 변화
 - modal image popup
 
 ## 3. 코드 세부사항
-### 1) 
-### 2) 
+### 1) canvas 사용
+### 2) RequestAnimationFrame 사용
+### 3) 
 
